@@ -35,7 +35,7 @@ export default function HospitalDashboard() {
       params.append("to_date", to);
     }
 
-    const url = `http://127.0.0.1:8000/dashboard/?${params.toString()}`;
+    const url = `http://192.168.1.72:8000/dash/?${params.toString()}`;
 
     // Replace with your actual Django server URL if different
     fetch(url)
@@ -531,11 +531,11 @@ export default function HospitalDashboard() {
         </section>
 
         {/* --- SECTION 3: TABULAR LOGISTICS --- */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section className="grid grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Diagnostic Services */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
             <div className="bg-purple-900 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider"><Activity className="w-4 h-4" /> Diagnostic Services</div>
-            <div className="p-2 flex-1 overflow-auto max-h-[300px]">
+            <div className="p-2 flex-1 overflow-auto max-h-[1000px]">
               <table className="w-full text-xs text-left border-collapse">
                 <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
                   {data.diagnostics.map((item, idx) => (
@@ -554,11 +554,11 @@ export default function HospitalDashboard() {
 
           {/* Consultations */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
-            <div className="bg-teal-700 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider">
+            <div className="bg-teal-700 px-4 py-3 text-white font-bold text-xs uppercase flex items-top gap-2 tracking-wider">
               <Users className="w-4 h-4" /> Consultations
             </div>
 
-            <div className="p-2 flex-1 overflow-auto max-h-[300px]">
+            <div className="p-2 flex-1 overflow-auto max-h-[1000px]">
               <table className="w-full text-xs text-left border-collapse">
                 <thead className="bg-slate-100 sticky top-0 z-10">
                   <tr className="text-slate-600 uppercase text-[10px]">
@@ -588,7 +588,7 @@ export default function HospitalDashboard() {
           {/* Bed Occupancy */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
             <div className="bg-rose-600 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider"><Bed className="w-4 h-4" /> Bed Occupancy</div>
-            <div className="p-2 flex-1 overflow-auto max-h-[300px]">
+            <div className="p-2 flex-1 overflow-auto max-h-[1000px]">
               <table className="w-full text-xs text-left border-collapse">
                 <thead className="bg-slate-100 sticky top-0 z-10">
                   <tr className="text-slate-600 uppercase text-[10px]">
@@ -617,6 +617,11 @@ export default function HospitalDashboard() {
             </div>
           </div>
         </section>
+      </div>
+      <div className="marquee-container">
+        <div className="marquee-text">
+          Powered by D-Code Technology Pvt. Ltd.
+        </div>
       </div>
     </div>
   );

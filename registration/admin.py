@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Tblpatbilldetail
+from common.models import Tblpatbilldetail
 
 # Register your models here.
 @admin.register(Tblpatbilldetail)

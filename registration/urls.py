@@ -13,5 +13,4 @@ urlpatterns = [
     path('report/',views.report,name='dashboard_report'),
     path('bill/',views.user_login,name='billing_report'),
     path('api/', include(router.urls)),
-    path('dashboard/', views.dashboard_stats_api,name='dashboard_api'),
 ]

@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'registration',
     'rest_framework',
     'corsheaders',
+    'broadcast_dashboard',
+    'common'
 ]
 
 MIDDLEWARE = [

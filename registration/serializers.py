@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Tblpatientdate, Tblpatientinfo, Tbldepartmentbed, Tblpatbilldetail, Tblencounter
+from common.models import Tblpatientdate, Tblpatientinfo, Tbldepartmentbed, Tblpatbilldetail, Tblencounter
 
 class TblpatientdateSerializer(serializers.ModelSerializer):
     fldptnamefir = serializers.CharField(source='tblpatientinfo.fldptnamefir', read_only=True)
