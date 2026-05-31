@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <!--<title>{% block title %}{% endblock %}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="{% static 'styles.css'%}">-->
+    {% include "includes/head.html" %}
+    {% block extrastyle %}{% endblock extrastyle %}
+
+</head>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+  <div class="wrapper">
+    {% include "includes/navigation.html" %}
+    <aside class="main-sidebar sidebar-light-primary elevation-4">
+      {% include "includes/sidebar.html" %}
+    </aside>
+    {% block content %}{% endblock content %}
+  </div>
+  {% include "includes/foot.html" %}
+  <div class="container">
+    <script src="{% static '/js/bootstrap.bundle.js'%}"></script>
+    <script src="{% static '/js/script.js'%}"></script>
+    <!--<script src="{% static '/js/main.bundle.js' %}"></script>-->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+  </div>
+</body>
+{% block script %}{% endblock script %}
+</html>

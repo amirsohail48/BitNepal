@@ -1,0 +1,403 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">     
+<html>     
+    <head>     
+    <meta content='text/html; charset=utf-8' http-equiv='content-type'>     
+           <title>D Code Health</title>     
+    <meta name='generator' content='healthybit'/>     
+    <meta name='create' content='09/06/2024 20:04:07'/>     
+    </head>     
+
+     <body>     
+
+<!-- HTML START -->
+<section id='printable@report' class='printable@report'>
+<!-- CSS TEMPLATE START -->
+<style>
+
+/* page format to be used by chrome */
+@page {
+	margin-top: 10mm;
+  	margin-bottom: 10mm;
+  	margin-right: 10mm;
+  	margin-left: 10mm;
+	size: A4 portrait;
+}
+
+body {
+   /* font-family:Verdana,sans-serif; */
+   font-size:12px;
+}
+.title_table {
+}
+
+.header_table {
+}
+
+.report_table {
+   border: 0px;
+   border-collapse: collapse;
+}
+
+.report_table td {
+   border: 0px solid white;
+   page-break-inside: avoid;
+}
+
+.report_table td:nth-of-type(1) {
+ /*  display: none; */
+}
+
+.report_table tr {
+   page-break-inside: avoid;
+}
+
+.report_table_h {
+   background: #F0F0F0;
+   text-align:left;
+   font-weight:bold;
+   text-transform: uppercase; 
+}
+
+.reportmid_table {
+}
+
+.reportmid_image {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+.row_section {
+   border-bottom: 1px solid #ccc;
+   border-top: 1px solid #ccc;
+}
+
+.row_chapter {
+}
+
+.footer_table {
+}
+
+
+</style>
+
+<!-- CSS TEMPLATE END -->
+<!-- TITLE START -->
+<style>
+body {
+	background-image: url("");
+        background-repeat:no-repeat;
+        background-size:cover;
+	letter-spacing: 1px;
+	font-size: 13px;
+	line-height: 2;
+} 
+
+</style>
+
+<table class='title_table' style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="0" id="titletable">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top; height: 69px; width: 71px;"><img style="width: 71px; height: 71px;" alt="" src=/home/amir/.config/healthybit/Nepal.png><br>
+      </td>
+      <td style="vertical-align: top; text-align: center; "><span style="font-weight: bold;"><span style="font-size: 14px;text-transform: uppercase;">Dcode Hospital</span></span><br><span>Lazimpat, Kathmandu</span></td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- TITLE END -->
+<!-- HEADER START -->
+
+<table class='header_table' style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="0" id="headtable">
+  <tbody>
+    
+    <tr>
+    
+    <td style="vertical-align: top;font-weight:bold;width:10%">Name </td>
+    <td style="vertical-align: top;width:35%">: {{ Name }}</td>
+      
+    <td style="vertical-align: top;font-weight:bold;width:10%">EncID </td>
+    <td style="vertical-align: top;width:25%">: {{ Encounter }}</td>
+      
+    <td colspan="1" rowspan="4" style="vertical-align: top; width: 20%; height: auto; text-align: center;"><img style="width: 50%; height: auto%;" alt="" src=/tmp/gambas.1000/167236/3.tmp.png></td>
+    
+   </tr>
+   
+   
+   <tr>
+    
+    <td style="vertical-align: top;font-weight:bold;width:10%">Age/Sex </td>
+    <td style="vertical-align: top;width:35%">: {{ Age }}/{{ Gender }}</td>
+      
+    <td style="vertical-align: top;font-weight:bold;width:10%">DOReg </td>
+    <td style="vertical-align: top;width:25%">: 07/31/2024</td>
+      
+    </tr>
+    
+    
+   <tr>
+       
+    <td style="vertical-align: top;font-weight:bold;width:10%">Address </td>
+    <td style="vertical-align: top;width:35%">: {{ Address }}</td>
+      
+    <td style="vertical-align: top;font-weight:bold;width:10%">Phone </td>
+    <td style="vertical-align: top;width:25%">: {{Contact}}</td>
+      
+    </tr>
+    
+    <tr>
+    
+    <td style="vertical-align: top;font-weight:bold;width:10%">PAN </td>
+    <td style="vertical-align: top;width:35%">: {{ bill_no }}</td>
+      
+    <td style="vertical-align: top;font-weight:bold;width:10%">ClaimCode </td>
+    <td style="vertical-align: top;width:25%">: 114704280</td>
+      
+    </tr>
+    
+    <tr>
+    
+    <td style="vertical-align: top;font-weight:bold;width:10%">SECTION </td>
+    <td style="vertical-align: top;width:35%">: Biochemistry;Hematology;Hormone;Parasitology</td>
+   
+    </tr>
+    
+  </tbody>
+</table>
+
+
+<!-- HEADER END -->
+<!-- BODY START -->
+
+  <table  class='report_table' style='text-align: left; width: 100%;' id='bodytable'>
+    <thead>
+    <tr>
+      <th class='report_table_h'>Examination</th>
+      <th class='report_table_h'>Observation</th>
+      <th class='report_table_h'>Reference Range</th>
+    </tr>
+    </thead>
+    <tbody>
+
+  
+    
+    {% for test in quantitative_test %}
+      {% if test.fldtest_type == "Quantitative"%}
+        <tr>
+          <td ><span data-row='0' data-column='0' ><span>{{ test.fldtestid }}</span><br></span></td>
+          <td ><span data-row='0' data-column='1' ><span>{{ test.fldreportquanti }}</span><br></span></td>
+          <td ><span data-row='0' data-column='2' ><span>{{ test.fldmetlow }}-{{ test.fldmethigh }} {{ test.fldmetunit }}</span><br></span></td>
+        </tr>
+      {% endif %}
+    {% endfor %}
+    {% if test_type == "Qualitative"%}
+      <tr>
+        <td><span data-row='0' data-column='0'>{{ test.fldtestid }}</span><br></td>
+        <td><span data-row='0' data-column='1'>{{ test.fldreportquanti }}</span><br></td>
+        <td><span data-row='0' data-column='2'></span><br></td>
+      </tr>
+      
+      <!-- Loop through subtests for the current test -->
+      {% for subtest in Patlabsubtest %}
+        {% if subtest.fldparent == test.fldtestid %}
+          <tr>
+            <td><span data-row='0' data-column='0'>{{ subtest.fldsubtest }}</span><br></td>
+            <td><span data-row='0' data-column='1'>{{ subtest.fldreport }}</span><br></td>
+            <td><span data-row='0' data-column='2'></span><br></td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    {% endif%}
+  <tr class='row_section' align='center'>
+    <td colspan='3' rowspan='1'><span style='font-weight: bold;'>Biochemistry</span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='1' data-column='0' ><span>Glucose PP (Blood)</span><br></span></td>
+    <td ><span data-row='1' data-column='1' ><span>217 mg/dl</span><br></span></td>
+    <td ><span data-row='1' data-column='2' ><span>60  -  140 mg/dl</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='2' data-column='0' ><span>Urea (Blood)</span><br></span></td>
+    <td ><span data-row='2' data-column='1' ><span>13 mg/dl</span><br></span></td>
+    <td ><span data-row='2' data-column='2' ><span>10  -  45 mg/dl</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='3' data-column='0' ><span>Creatinine (Serum)</span><br></span></td>
+    <td ><span data-row='3' data-column='1' ><span>0.63 mg/dl</span><br></span></td>
+    <td ><span data-row='3' data-column='2' ><span>0.5  -  1.4 mg/dl</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='4' data-column='0' ><span>Sodium (Serum)</span><br></span></td>
+    <td ><span data-row='4' data-column='1' ><span>140 mmol/l</span><br></span></td>
+    <td ><span data-row='4' data-column='2' ><span>135  -  155 mmol/l</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='5' data-column='0' ><span>Potassium (Serum)</span><br></span></td>
+    <td ><span data-row='5' data-column='1' ><span>4 mmol/l</span><br></span></td>
+    <td ><span data-row='5' data-column='2' ><span>3.5  -  5.5 mmol/l</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='6' data-column='0' ><span>Bilirubin Total</span><br></span></td>
+    <td ><span data-row='6' data-column='1' ><span>0.5 mg/dl</span><br></span></td>
+    <td ><span data-row='6' data-column='2' ><span>0.4  -  1.2 mg/dl</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='7' data-column='0' ><span>Bilirubin Direct</span><br></span></td>
+    <td ><span data-row='7' data-column='1' ><span>0.13 mg/dl</span><br></span></td>
+    <td ><span data-row='7' data-column='2' ><span>0  -  0.4 mg/dl</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='8' data-column='0' ><span>Alkaline Phosphatase (ALP)</span><br></span></td>
+    <td ><span data-row='8' data-column='1' ><span>98 IU/L</span><br></span></td>
+    <td ><span data-row='8' data-column='2' ><span>30  -  120 IU/L</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='9' data-column='0' ><span>Serum Glutamic Pyruvic Transaminase (SGPT)</span><br></span></td>
+    <td ><span data-row='9' data-column='1' ><span>21 IU/L</span><br></span></td>
+    <td ><span data-row='9' data-column='2' ><span>5  -  40 IU/L</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='10' data-column='0' ><span>Serum Glutamic-Oxaloacetic Transaminase (SGOT)</span><br></span></td>
+    <td ><span data-row='10' data-column='1' ><span>20 IU/L</span><br></span></td>
+    <td ><span data-row='10' data-column='2' ><span>0  -  46 IU/L</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='11' data-column='0' ><span>Total Protein (Serum)</span><br></span></td>
+    <td ><span data-row='11' data-column='1' ><span>6.9 g/dl</span><br></span></td>
+    <td ><span data-row='11' data-column='2' ><span>6  -  8.7 g/dl</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='12' data-column='0' ><span>Albumin (Serum)</span><br></span></td>
+    <td ><span data-row='12' data-column='1' ><span>3.9 gm/dl</span><br></span></td>
+    <td ><span data-row='12' data-column='2' ><span>3.2  -  5.5 gm/dl</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='13' data-column='0' ><span>Globulin</span><br></span></td>
+    <td ><span data-row='13' data-column='1' ><span>3 g/dl</span><br></span></td>
+    <td ><span data-row='13' data-column='2' ><span>2.3  -  3.5 g/dl</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='14' data-column='0' ><span>A:G Ratio</span><br></span></td>
+    <td ><span data-row='14' data-column='1' ><span>1.3 </span><br></span></td>
+    <td ><span data-row='14' data-column='2' ><span>1  -  1.8 </span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='15' data-column='0' ><span>Lipid Profile</span><br></span></td>
+    <td ><span data-row='15' data-column='1' ></span></td>
+    <td ><span data-row='15' data-column='2' ></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='16' data-column='0' ><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cholesterol Total</span><br></span></td>
+    <td ><span data-row='16' data-column='1' ><span>156 </span><br></span></td>
+    <td ><span data-row='16' data-column='2' ><span>0 - 200 mg / dL</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='17' data-column='0' ><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HDL - Cholesterol</span><br></span></td>
+    <td ><span data-row='17' data-column='1' ><span>32 </span><br></span></td>
+    <td ><span data-row='17' data-column='2' ><span>30 - 70 mg / dL</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='18' data-column='0' ><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Triglyceride</span><br></span></td>
+    <td ><span data-row='18' data-column='1' ><span>365 </span><br></span></td>
+    <td ><span data-row='18' data-column='2' ><span>30 - 200 mg / dL</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='19' data-column='0' ><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LDL - Cholesterol</span><br></span></td>
+    <td ><span data-row='19' data-column='1' ><span>51 </span><br></span></td>
+    <td ><span data-row='19' data-column='2' ><span>0 - 165 mg / dL</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='20' data-column='0' ><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;VLDL</span><br></span></td>
+    <td ><span data-row='20' data-column='1' ><span>73 </span><br></span></td>
+    <td ><span data-row='20' data-column='2' ><span>10- 50 mg / dL</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='21' data-column='0' ><span>Uric Acid</span><br></span></td>
+    <td ><span data-row='21' data-column='1' ><span>4.4 mg/dl</span><br></span></td>
+    <td ><span data-row='21' data-column='2' ><span>2.5  -  6.5 mg/dl</span><br></span></td>
+  </tr>
+<tr class='row_section' align='center'>
+<td colspan='3' rowspan='1'><span style='font-weight: bold;'>Hematology</span></td>
+</tr>
+  <tr>
+    <td ><span data-row='22' data-column='0' ><span>HbA1C</span><br></span></td>
+    <td ><span data-row='22' data-column='1' ><span>7.2 %</span><br></span></td>
+    <td ><span data-row='22' data-column='2' ><span>4  -  6.5 %</span><br></span></td>
+  </tr>
+<tr class='row_section' align='center'>
+<td colspan='3' rowspan='1'><span style='font-weight: bold;'>Hormone</span></td>
+</tr>
+  <tr>
+    <td ><span data-row='23' data-column='0' ><span>Thyroid Function Test</span><br></span></td>
+    <td ><span data-row='23' data-column='1' ></span></td>
+    <td ><span data-row='23' data-column='2' ></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='24' data-column='0' ><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Free Triiodothyronine (FT3)</span><br></span></td>
+    <td ><span data-row='24' data-column='1' ><span>2.30</span><br></span></td>
+    <td ><span data-row='24' data-column='2' ><span>2.0 - 4.4 pg/ml</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='25' data-column='0' ><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Free Thyroxine (FT4)</span><br></span></td>
+    <td ><span data-row='25' data-column='1' ><span>1.15</span><br></span></td>
+    <td ><span data-row='25' data-column='2' ><span>0.89 - 1.76 ng/dl</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='26' data-column='0' ><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Thyroid-Stimulating Hormone (TSH)</span><br></span></td>
+    <td ><span data-row='26' data-column='1' ><span>3.59</span><br></span></td>
+    <td ><span data-row='26' data-column='2' ><span>0.27 - 4.40 µIU/mL</span><br></span></td>
+  </tr>
+  <tr>
+    <td ><span data-row='27' data-column='0' ><span>Vitamin B12</span><br></span></td>
+    <td ><span data-row='27' data-column='1' ><span>369.3 pg/ml</span><br></span></td>
+    <td ><span data-row='27' data-column='2' ><span>211  -  911 pg/ml</span><br></span></td>
+  </tr>
+<tr class='row_section' align='center'>
+<td colspan='3' rowspan='1'><span style='font-weight: bold;'>Parasitology</span></td>
+</tr>
+  <tr>
+    <td ><span data-row='28' data-column='0' ><span>Helicobacter Pylori Antigen</span><br></span></td>
+    <td ><span data-row='28' data-column='1' ><span>Negative</span><br></span></td>
+    <td ><span data-row='28' data-column='2' ></span></td>
+  </tr>
+    </tbody>
+  </table>
+
+<!-- BODY END -->
+<!-- FOOTER START -->
+<hr style="width: 100%; height: 2px;">
+
+
+
+
+<p><br>
+
+</p>
+
+<table class='footer_table' style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="0" id="foottable">
+<tbody>
+<tr>
+<td style="vertical-align: top; width: 33%;"><br>
+</td>
+<td style="vertical-align: top; width: 33%;"><br>
+</td>
+<td style="vertical-align: top; width: 33%;"><br>
+</td>
+</tr>
+</tbody>
+</table>
+
+<p><small>admin, 09/06/2024</small></p>
+
+  
+
+
+<!-- FOOTER END -->
+<!-- FOOTIMAGE START -->
+
+<!-- FOOTIMAGE END -->
+</section>
+<!-- HTML END -->
+</body>     
+</html>     

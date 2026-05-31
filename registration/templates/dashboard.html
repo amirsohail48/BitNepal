@@ -1,0 +1,530 @@
+{% extends "base.html" %}
+{% load static %}
+{%block content%}
+  <div class="content-wrapper">
+    <div class="my-3 mx-2">
+      <div class="container-fluid border my-7">
+        <div class="row">
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="small-box bg-gradient-secondary">
+              <div class="inner">
+                <h3 class="">1000</h3>
+                <p class="">Total Patient</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-hospital-user"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="small-box bg-gradient-muted">
+              <div class="inner">
+                <h3 class="info-box-number">800</h3>
+                <p class="">OPD Patient</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-stethoscope"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="small-box bg-gradient-secondary">
+              <div class="inner">
+                <h3 class="info-box-number">200</h3>
+                <p class="info-box-text">Emergency</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-ambulance"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="small-box bg-gradient-muted">
+              <div class="inner">
+                <h3 class="info-box-number">50</h3>
+                <p class="info-box-text">Admitted</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-wheelchair"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="small-box bg-gradient-secondary">
+              <div class="inner">
+                <h3 class="info-box-number">10</h3>
+                <p class="info-box-text">Discharge</p>
+              </div>
+              <div class="icon">
+                <i class="far bi-person-walking"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="small-box bg-gradient-muted">
+              <div class="inner">
+                <h3 class="info-box-number">80</h3>
+                <p class="info-box-text">IPD Patient</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-bed"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="small-box bg-gradient-secondary">
+              <div class="inner">
+                <h3 class="">589</h3>
+                <p class="">Laboratory</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-vial"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="small-box bg-gradient-muted">
+              <div class="inner">
+                <h3 class="info-box-number">10</h3>
+                <p class="">Birth</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-user"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="small-box bg-gradient-secondary">
+              <div class="inner">
+                <h3 class="info-box-number">1</h3>
+                <p class="info-box-text">Death</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="small-box bg-gradient-muted">
+              <div class="inner">
+                <h3 class="info-box-number">50</h3>
+                <p class="info-box-text">Admitted</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-wheelchair"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="small-box bg-gradient-secondary">
+              <div class="inner">
+                <h3 class="info-box-number">500</h3>
+                <p class="info-box-text">Pharmacy</p>
+              </div>
+              <div class="icon">
+                <i class="fa fa-tablet"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="small-box bg-gradient-muted">
+              <div class="inner">
+                <h3 class="info-box-number">80</h3>
+                <p class="info-box-text">Radiology</p>
+              </div>
+              <div class="icon">
+                <i class="fas fa-x-ray"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="content my-7">
+        <div class="container-fluid">
+          <div class="row">
+            <div class=" col-md-4 card card-info">
+              <!--lineChart Total OutPatient-->
+              <div class="card-body row">
+                <div>
+                  <h5 class="card-title text-primary">Total OutPatients</h5>
+                  <h6 class="card-text mb-2 text-dark">Weekly</h6>
+                </div>
+                <div>
+                  <canvas id="total-patients-chart" style="min-height:250px;"></canvas>
+                </div>
+                <div>
+                  <h4 class="card-text text-start">Total: {{ consult }}</h4>
+                  <h4 class="card-text text-start">Today: {{ today }}</h4>
+                </div>
+              </div>
+            </div>
+            <!--lineChart Revenue-->
+            <!--<div class="col-md-6 card">
+              <div class="card-body row">
+                <h5 class="card-title text-primary">Revenue</h5>
+                <h6 class="card-subtitle mb-2">Annual</h6>
+                <div>
+                  <canvas id="total-revenue-chart"></canvas>
+                </div>
+                <h3 class="card-text text-end">Cash: Rs.{{ total_revenue|floatformat:0}}</h3>
+                <h3 class="card-text text-end">Credit: Rs.{{ total_crRevenue|floatformat:0 }}</h3>
+              </div>
+            </div>-->
+            <!--lineChart Total Patient-->
+            <div class="col-md-4 card">
+              <div class="card-body row">
+                <div>
+                  <h5 class="card-title text-primary">InPatient</h5>
+                  <h6 class="card-text mb-2">Weekly</h6>
+                </div>
+                <div>
+                  <canvas id="total-IPD-chart" style="min-height:250px;"></canvas>
+                </div>
+                <div>
+                  <h3 class="card-text text-end">Admitted: {{ total_admit }}</h3>
+                  <h3 class="card-text text-end">Discharge: {{ total_exit }}</h3>
+                </div>
+              </div>
+            </div>
+            <!-- Pie Chart-->
+            <div class="col-md-4 card">
+              <div class="card-body row">
+              <h5 class="text-center">DepartmentWise Visit</h5>
+              <h6 class="text-center">Daily</h6>
+            <canvas id="departChart"></canvas>
+            </div>
+          </div>
+          <div class="row"
+            <!--Diagnostic Services Table-->
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Diagnostic Services</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th style="width: 10px">#</th>
+                        <th>Particular</th>
+                        <th>Unit</th>
+                        <th style="width: 40px">Number</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style="background-color: #ffffcc;">1.</td>
+                        <td style="background-color: #ffffcc;">X-ray</td>
+                        <td style="background-color: #ffffcc;"><span class="">Number</span></td>
+                        <td><span class="">{{ Xray_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">2.</td>
+                        <td style="background-color: #ffffcc;">Ultrasonogram (USG)</td>
+                        <td style="background-color: #ffffcc;"><span class="">Number</span></td>
+                        <td><span class="">{{ usg_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">3.</td>
+                        <td style="background-color: #ffffcc;">Echocardiogram (Echo)</td>
+                        <td style="background-color: #ffffcc;"><span class="">Number</span></td>
+                        <td><span class="">{{ echo_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">4.</td>
+                        <td style="background-color: #ffffcc;">Electro Encephalo Gram (EEG)</td>
+                        <td style="background-color: #ffffcc;"><span class="">Number</span></td>
+                        <td><span class="">{{ electroEnc_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">5.</td>
+                        <td style="background-color: #ffffcc;">Electrocardiogram (ECG)</td>
+                        <td style="background-color: #ffffcc;"><span class="">Number</span></td>
+                        <td><span class="">{{ ekg_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">6.</td>
+                        <td style="background-color: #ffffcc;">Trademill</td>
+                        <td style="background-color: #ffffcc;"><span class="">Number</span></td>
+                        <td><span class="">{{ tmt_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">7.</td>
+                        <td style="background-color: #ffffcc;">Computed Tomographic (CT) Scan</td>
+                        <td style="background-color: #ffffcc;"><span class="">Number</span></td>
+                        <td><span class="">{{ ct_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">8.</td>
+                        <td style="background-color: #ffffcc;">Magnetic Resonance Imaging (MRI)</td>
+                        <td style="background-color: #ffffcc;"><span class="">Number</span></td>
+                        <td><span class="">{{ mri_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">9.</td>
+                        <td style="background-color: #ffffcc;">Endoscopy</td>
+                        <td style="background-color: #ffffcc;"><span class="">Persons</span></td>
+                        <td><span class="">{{ endo_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">10.</td>
+                        <td style="background-color: #ffffcc;">Colonoscopy</td>
+                        <td style="background-color: #ffffcc;"><span class="">Persons</span></td>
+                        <td><span class="">{{ col_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">11.</td>
+                        <td style="background-color: #ffffcc;">Bronchoscopy</td>
+                        <td style="background-color: #ffffcc;"><span class="">Persons</span></td>
+                        <td><span class="">{{ bron_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">12.</td>
+                        <td style="background-color: #ffffcc;">Nuclear Medicine</td>
+                        <td style="background-color: #ffffcc;"><span class="">Persons</span></td>
+                        <td><span class="">{{ nucl_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">13.</td>
+                        <td style="background-color: #ffffcc;">Mammogram</td>
+                        <td style="background-color: #ffffcc;"><span class="">Persons</span></td>
+                        <td><span class="">{{ mam_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">14.</td>
+                        <td style="background-color: #ffffcc;">Cystoscopy</td>
+                        <td style="background-color: #ffffcc;"><span class="">Persons</span></td>
+                        <td><span class="">{{ cysto_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">15.</td>
+                        <td style="background-color: #ffffcc;">DEXA Scan</td>
+                        <td style="background-color: #ffffcc;"><span class="">Persons</span></td>
+                        <td><span class="">{{ dexa_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">16.</td>
+                        <td style="background-color: #ffffcc;">DTPA Scan</td>
+                        <td style="background-color: #ffffcc;"><span class="">Persons</span></td>
+                        <td><span class="">{{ dtpa_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">17.</td>
+                        <td style="background-color: #ffffcc;">Electroconvulsive Therapy (ECT)</td>
+                        <td style="background-color: #ffffcc;"><span class="">Persons</span></td>
+                        <td><span class="">{{ ect_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">18.</td>
+                        <td style="background-color: #ffffcc;">Transcranial Magnetic Simulation (TMS)</td>
+                        <td style="background-color: #ffffcc;"><span class="">Persons</span></td>
+                        <td><span class="">{{ tms_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">19.</td>
+                        <td style="background-color: #ffffcc;">Total Laboratory Service Provided</td>
+                        <td style="background-color: #ffffcc;"><span class="">Persons</span></td>
+                        <td><span class="">{{ tlsp_total|floatformat:0 }}</span></td>
+                      </tr>
+                      <tr>
+                        <td style="background-color: #ffffcc;">20.</td>
+                        <td style="background-color: #ffffcc;">Other Service Provided (if any)</td>
+                        <td style="background-color: #ffffcc;"><span class="">Persons</span></td>
+                        <td><span class="">{{ osp_total|floatformat:0 }}</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 mx-3 my-5">
+        <h3 class="text-center">Subscriber count</h3>
+        <div class="bg-secondary bg-opacity-25 px-5 py-3 rounded">
+          <canvas id="subscriber-Count"></canvas>
+        </div>
+      </div>
+      <div class="row">
+        <!--Datatable-->
+        <div class="col-12">
+          <div class="card">
+            <h3 class="text-center">Admitted Patient</h3>
+            <table id="admitdatatable" class="display">
+              <thead>
+                <tr>
+                  <th>Encounter</th>
+                  <th>Name</th>
+                  <th>Surname</th>
+                  <th>Gender</th>
+                  <th>Department</th>
+                  <th>Bed</th>
+                  <th>Address</th>
+                  <th>Age</th>
+                  <th>Contact</th>
+                </tr>    
+              </thead>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock%}
+{% block script %}
+  <script>
+    document.addEventListener('DOMContentLoaded', (Event) => {
+      const patientData = JSON.parse('{{ chardata | escapejs }}');
+      const revenueData = JSON.parse('{{ data_revenue | escapejs }}');
+      const crRevenueData = JSON.parse('{{ data_crrevenue | escapejs }}');
+      const exitData = JSON.parse('{{ data_exit | escapejs }}');
+      const admitData = JSON.parse('{{ data_admit | escapejs }}');
+      
+      const totalPatientChart = document.getElementById('total-patients-chart');
+      
+      new Chart(totalPatientChart, {
+          type:'line',
+          data: {
+              labels: patientData.labels,
+              datasets: [
+                  {
+                      label: 'OutPatient',
+                      backgroundColor     : 'rgba(60,141,188,0.9)',
+                      borderColor         : 'rgba(60,141,188,0.8)',
+                      pointRadius         : true,
+                      pointColor          : '#3b8bba',
+                      pointStrokeColor    : 'rgba(60,141,188,1)',
+                      pointHighlightFill  : '#fff',
+                      pointHighlightStroke: 'rgba(60,141,188,1)',
+                      data                : patientData.datas,
+                      borderWidth         :2,
+                      fill                : '-1'
+                  }
+              ]
+          },
+          options:{
+            responsive:true,
+              scales:{
+                  y: {
+                      beginAtZero: true
+                  }
+              }
+          }
+      });
+      const revenueChart = document.getElementById('total-revenue-chart');
+      new Chart(revenueChart, {
+          type:'line',
+          data: {
+              labels: revenueData.labels,
+              datasets: [
+                  {
+                      label               : 'cash',
+                      backgroundColor     : 'rgba(60,141,188,0.9)',
+                      borderColor         : 'rgba(60,141,188,0.8)',
+                      pointRadius         : true,
+                      pointColor          : '#3b8bba',
+                      pointStrokeColor    : 'rgba(60,141,188,1)',
+                      pointHighlightFill  : '#fff',
+                      pointHighlightStroke: 'rgba(60,141,188,1)',
+                      data                : revenueData.datas,
+                      borderWidth         : 2,
+                      fill                : '-1',
+                  },
+                  {
+                    label               :'Credit',
+                    backgroundColor     : 'rgba(60,141,188,0.9)',
+                    borderColor         : 'rgba(60,141,188,0.8)',
+                    pointRadius         : true,
+                    pointColor          : '#3b8bba',
+                    pointStrokeColor    : 'rgba(60,141,188,1)',
+                    pointHighlightFill  : '#fff',
+                    pointHighlightStroke: 'rgba(60,141,188,1)',
+                    data                : crRevenueData.datas,
+                    borderWidth         : 2,
+                    fill                : '-2',
+                    
+                  }
+              ]
+          },
+
+          options:{
+            mode: 'index',
+            scales:{
+            }
+          }
+      });
+      const IPDChart = document.getElementById('total-IPD-chart');
+      new Chart(IPDChart, {
+          type:'line',
+          data: {
+            labels: admitData.labels,
+            datasets: [
+              {
+                label: 'Admitted',
+                data: admitData.datas,
+                borderWidth:2,
+              },
+              {
+                label:'Discharge',
+                data: exitData.datas,
+                borderWidth:2,
+              }
+            ]
+          },
+          options:{
+            scales:{
+            }
+          }
+      });
+      const departData = JSON.parse('{{ data_departwise_count | escapejs }}');
+      const departChart = document.getElementById('departChart');      
+      new Chart(departChart, {
+        type:'pie',
+        data: {
+          labels: departData.labels,
+          datasets: [
+            {
+              label: '# of Visit',
+              data: departData.datas,
+
+              borderWidth:1
+            }
+          ]
+        },
+        
+        options:{
+          scales:{
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    })
+    $(document).ready(function() {
+      $('#admitdatatable').DataTable({
+        "processing" : true,
+        "serverSide" : true,
+        "ajax": {
+          "url": "/api/Tblpatientdate/",
+          "type":"GET"
+        },
+        "columns": [
+          {"data": "encounterval"},
+          {"data": "patientfirname"},
+          {"data": "patientlastname"},
+          {"data": "ptsex"},
+          {"data": "dept"},
+          {"data": "bed"},          
+          {"data": "ptaddress"},
+          {"data": "ptbirthday"},
+          {"data": "ptcontact"},
+        ]
+      });
+    });
+  </script>
+{% endblock script %}
