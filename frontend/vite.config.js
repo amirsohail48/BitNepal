@@ -8,6 +8,13 @@ export default defineConfig({
     host: '0.0.0.0',  // Listen on all network interfaces
     port: 5173,
     strictPort: true,  // Fail if port 5173 is already in use
+    proxy: {
+      "/dashboard": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/dashboard/, "/dash"),
+      },
+    },
   },
   build: {
     // Looks for a folder named 'static' in your Django app folder
