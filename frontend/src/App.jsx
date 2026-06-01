@@ -23,7 +23,7 @@ export default function HospitalDashboard() {
   const [lastUpdated, setLastUpdated] = useState("");
 
   // 2. Define the function that fetches data from Django
-  const fetchDashboardData = (from = fromDate, to = toDate, silent = 'false') => {
+  const fetchDashboardData = (from = fromDate, to = toDate, silent = false) => {
     if (!silent) {
       setLoading(true);
     }
@@ -55,6 +55,7 @@ export default function HospitalDashboard() {
       })
       .then((jsonData) => {
         setData(jsonData);
+        setLastUpdated(new Date().toLocaleTimeString());
         setLoading(false);
       })
       .catch((err) => {
@@ -66,7 +67,12 @@ export default function HospitalDashboard() {
 
   // 3. Run the fetch function automatically when the component mounts
   useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  useEffect(() => {
     if (!autoRefresh) return;
+
     const intervalId = setInterval(() => {
       fetchDashboardData(fromDate, toDate, true);
     }, refreshSeconds * 1000);
