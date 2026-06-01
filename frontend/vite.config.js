@@ -11,7 +11,7 @@ export default defineConfig({
   },
   build: {
     // Looks for a folder named 'static' in your Django app folder
-    outDir: path.resolve(__dirname, '../core/static/dist'),
+    outDir: path.resolve(__dirname, 'dist'),
     emptyOutDir: true,
     rollupOptions: {
       output: {
