@@ -132,8 +132,11 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
     BASE_DIR / "registration/static",
 ]
@@ -154,5 +157,22 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://192.168.1.72:5173"
+    "http://192.168.1.72:5173",
+    "http://127.0.0.1:8080",
+    "http://localhost:8080",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+
+    "http://127.0.0.1:8080",
+    "http://localhost:8080",
+
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+
+    # production server/domain
+    "http://your-domain.com",
+    "https://your-domain.com",
 ]

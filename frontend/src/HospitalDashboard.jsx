@@ -1,371 +1,672 @@
-import React from 'react';
+// hospitalDashboard.jsx
+import React, { useState, useEffect } from "react";
+import hospitalLogo from "./assets/hospital_logo.png";
+import companyLogo from "./assets/company_logo.png";
+
 import {
-    Users, User, Shield, PieChart, BarChart3,
-    Activity, ClipboardList, Bed, RefreshCw, Calendar
-} from 'lucide-react';
+    Users,
+    User,
+    Shield,
+    PieChart as PieChartIcon,
+    BarChart3,
+    Activity,
+    ClipboardList,
+    Bed,
+    RefreshCw,
+    Calendar,
+} from "lucide-react";
+
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    Tooltip,
+    Legend,
+    ResponsiveContainer,
+    CartesianGrid,
+    PieChart as RechartsPieChart,
+    Pie,
+    Cell,
+} from "recharts";
 
 export default function HospitalDashboard() {
-    // Mock data matching the dashboard image
-    const data = {
-        dateFrom: "05/04/2026",
-        dateTo: "05/04/2026",
-        demographics: {
-            female: { count: 482, percentage: 66 },
-            male: { count: 252, percentage: 34 },
-            total: 734,
-            insuranceCoverage: { percentage: 87, count: 641 }
-        },
-        paymentTypes: {
-            coPay: { count: 533, percentage: 72.6, female: 362, male: 171 },
-            nonPay: { count: 108, percentage: 14.7, female: 60, male: 48 },
-            general: { count: 92, percentage: 12.5, female: 0, male: 92 } // Adjusted breakdown for representation
-        },
-        diagnostics: [
-            { name: "X-ray", count: 141 }, { name: "CT Scan", count: 7 },
-            { name: "Ultrasonogram (USG)", count: 97 }, { name: "MRI", count: 0 },
-            { name: "Echocardiogram (Echo)", count: 18 }, { name: "EEG", count: 0 },
-            { name: "Electrocardiogram (ECG)", count: 49 }, { name: "Others", count: 0 },
-            { name: "Laboratory Services", count: 1395 }
-        ],
-        consultations: [
-            { name: "GENERAL MEDICINE", count: 221 }, { name: "OPHTHALMOLOGY", count: 35 },
-            { name: "INTERNAL MEDICINE", count: 164 }, { name: "GENERAL SURGERY", count: 39 },
-            { name: "ORTHOPEDICS", count: 117 }, { name: "DENTAL", count: 23 },
-            { name: "GYNAE/OBS", count: 70 }, { name: "HOMEOPATHIC", count: 10 },
-            { name: "ENT", count: 32 }, { name: "PSYCHIATRIC", count: 5 },
-            { name: "PEDIATRIC", count: 28 }, { name: "Other Departments", count: 31 }
-        ],
-        beds: [
-            { name: "Gynae", total: 7, occupied: 0, vacant: 7, pct: 0 },
-            { name: "HDU", total: 5, occupied: 1, vacant: 4, pct: 20 },
-            { name: "ICU", total: 5, occupied: 0, vacant: 5, pct: 0 },
-            { name: "Isolation", total: 1, occupied: 0, vacant: 1, pct: 0 },
-            { name: "Medicine", total: 7, occupied: 7, vacant: 0, pct: 100 },
-            { name: "Ortho Surgery", total: 13, occupied: 5, vacant: 8, pct: 38 },
-            { name: "Pediatric", total: 5, occupied: 3, vacant: 2, pct: 60 },
-        ]
+    const [settings, setSettings] = useState(null);
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const [fromDate, setFromDate] = useState("");
+    const [toDate, setToDate] = useState("");
+    const [selectedPreset, setSelectedPreset] = useState("today");
+
+    const [autoRefresh, setAutoRefresh] = useState(true);
+    const [refreshSeconds, setRefreshSeconds] = useState(30);
+    const [lastUpdated, setLastUpdated] = useState("");
+
+    // 2. Define the function that fetches data from Django
+    const fetchDashboardData = (from = fromDate, to = toDate, silent = false) => {
+        if (!silent) {
+            setLoading(true);
+        }
+
+        const params = new URLSearchParams();
+
+        if (from && to) {
+            params.append("from_date", from);
+            params.append("to_date", to);
+        }
+
+        const url = `/dashboard/?${params.toString()}`;
+
+        // Replace with your actual Django server URL if different
+        fetch(url)
+            .then(async (response) => {
+                const text = await response.text();
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${text}`);
+                }
+
+                try {
+                    return JSON.parse(text);
+                } catch {
+                    console.error("Django returned non-JSON:", text);
+                    throw new Error("Django returned HTML/text instead of JSON");
+                }
+            })
+            .then((jsonData) => {
+                setData(jsonData);
+                setLastUpdated(new Date().toLocaleTimeString());
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.error("Error fetching data:", err);
+                setError(err.message);
+                setLoading(false);
+            });
     };
 
-    return (
-        <div className="bg-slate-100 min-h-screen p-4 font-sans text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
-            {/* --- TOP BAR / HEADER --- */}
-            <header className="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-xs text-center p-1 border-2 border-blue-900">
-                        HOSPITAL LOGO
-                    </div>
-                    <div>
-                        <h1 className="text-xl md:text-2xl font-black tracking-tight text-blue-900">MADAN BHANDARI HOSPITAL & TRAUMA CENTER</h1>
-                        <p className="text-xs italic font-medium text-emerald-600">Excellence in Care, Every Time</p>
-                    </div>
-                </div>
+    // 3. Run the fetch function automatically when the component mounts
+    useEffect(() => {
+        fetch("/dashboard/settings/")
+            .then((res) => res.json())
+            .then((data) => setSettings(data))
+            .catch((err) => console.error("Settings fetch error:", err));
+    }, []);
 
-                {/* Date Filter Controls */}
-                <div className="flex flex-wrap items-center gap-3 text-xs">
-                    <div className="flex flex-col">
-                        <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">From Date</span>
-                        <div className="flex items-center gap-2 border rounded-lg px-3 py-2 bg-slate-50">
-                            <Calendar className="w-4 h-4 text-slate-400" />
-                            <span className="font-semibold">{data.dateFrom}</span>
-                        </div>
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">To Date</span>
-                        <div className="flex items-center gap-2 border rounded-lg px-3 py-2 bg-slate-50">
-                            <Calendar className="w-4 h-4 text-slate-400" />
-                            <span className="font-semibold">{data.dateTo}</span>
-                        </div>
-                    </div>
-                    <button className="mt-4 bg-blue-600 hover:bg-blue-700 transition text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 shadow-sm shadow-blue-200">
-                        <RefreshCw className="w-3.5 h-3.5" /> Refresh
+    useEffect(() => {
+        fetchDashboardData();
+    }, []);
+
+    useEffect(() => {
+        if (!autoRefresh) return;
+
+        const intervalId = setInterval(() => {
+            fetchDashboardData(fromDate, toDate, true);
+        }, refreshSeconds * 1000);
+
+        return () => clearInterval(intervalId);
+    }, [autoRefresh, refreshSeconds, fromDate, toDate]);
+
+    // 4. Handle Loading State
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-100">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900 mb-4"></div>
+                <p className="text-slate-600 font-bold animate-pulse">Synchronizing HMIS Analytics Hub...</p>
+            </div>
+        );
+    }
+
+    // 5. Handle Error State
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-100 p-4">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl shadow-sm text-center">
+                    <h3 className="font-bold text-lg mb-1">Connection Error</h3>
+                    <p className="text-sm mb-4">{error}</p>
+                    <button
+                        onClick={fetchDashboardData}
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition"
+                    >
+                        Retry Connection
                     </button>
                 </div>
-            </header>
+            </div>
+        );
+    }
 
-            {/* --- SECTION 1: TOP SUMMARY KPI CARDS --- */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                {/* Female Patients */}
-                <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-emerald-500 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500">
-                            <User className="w-6 h-6" />
-                        </div>
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+
+    const applyDatePreset = (preset) => {
+        const today = new Date();
+        let from = new Date();
+        let to = new Date();
+
+        if (preset === "today") {
+            from = today;
+            to = today;
+        } else if (preset === "yesterday") {
+            from.setDate(today.getDate() - 1);
+            to.setDate(today.getDate() - 1);
+        } else if (preset === "this_week") {
+            const day = today.getDay();
+            const diffToMonday = day === 0 ? -6 : 1 - day;
+            from.setDate(today.getDate() + diffToMonday);
+            to = today;
+        } else if (preset === "last_7_days") {
+            from.setDate(today.getDate() - 6);
+            to = today;
+        } else if (preset === "this_month") {
+            from = new Date(today.getFullYear(), today.getMonth(), 1);
+            to = today;
+        }
+
+        const formattedFrom = formatDate(from);
+        const formattedTo = formatDate(to);
+
+        setFromDate(formattedFrom);
+        setToDate(formattedTo);
+        setSelectedPreset(preset);
+
+        fetchDashboardData(formattedFrom, formattedTo);
+    };
+
+    const paymentChartData = Object.entries(data.paymentTypes || {}).map(([key, value]) => ({
+        name: key,
+        total: value.count || 0,
+        female: value.female ?? value.Female ?? 0,
+        male: value.male ?? value.Male ?? 0,
+        percentage: value.percentage ?? value.Percentage ?? 0,
+    }));
+    const paymentPieData = Object.entries(data.paymentTypes || {}).map(([key, value]) => ({
+        name: key,
+        value: value.count || 0,
+        percentage: value.percentage ?? value.Percentage ?? 0,
+    }));
+    const COLORS = ["#2563eb", "#10b981", "#f97316", "#a855f7", "#ef4444"];
+    const PaymentTypePatPieData = () => (
+        <div className="w-full h-80">
+            <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                    <text
+                        x="50%"
+                        y="48%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-slate-900 text-4xl font-black"
+                    >
+                        {data.demographics.total}
+                    </text>
+
+                    <text
+                        x="50%"
+                        y="58%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-slate-500 text-xs font-bold"
+                    >
+                        Total Patients
+                    </text>
+                    <Pie
+                        data={paymentPieData}
+                        dataKey="value"
+                        nameKey="name"
+                        outerRadius="80%"
+                        innerRadius="55%"
+                        paddingAngle={3}
+                        isAnimationActive={true}
+                        label={({ percentage }) => `${percentage}%`}
+                    >
+                        {paymentPieData.map((entry, index) => (
+                            <Cell
+                                key={`cell-${index}`}
+                                fill={COLORS[index % COLORS.length]}
+                            />
+                        ))}
+                    </Pie>
+
+                    <Tooltip
+                        formatter={(value, name) => [`${value} patients`, name]}
+                    />
+
+                    <Legend wrapperStyle={{ fontSize: "11px" }} />
+                </RechartsPieChart>
+            </ResponsiveContainer>
+        </div>
+    );
+
+    // DepartmentWise Consultation
+    const consultationRows = Object.entries(data.consultations || {}).map(([dept, value]) => ({
+        name: dept,
+        count: value.count || 0,
+        female: value.female ?? value.Female ?? 0,
+        male: value.male ?? value.Male ?? 0,
+        unknown: value.unknown ?? value.Unknown ?? 0,
+        percentage: value.percentage ?? value.Percentage ?? 0,
+    }));
+    //Departmentwise Bed Occupancy
+    const bedoccupancy = Object.entries(data.beds || {}).map(([value]) => ({
+        dept: value.name || 0,
+        total: value.total || 0,
+        occupied: value.occupied || 0,
+        vacant: value.vacant || 0,
+        pct: value.pct || 0
+    }))
+    const totalDiagnostics = data.diagnostics.reduce(
+        (sum, item) => sum + Number(item.count || 0),
+        0
+    );
+
+    const totalConsultations = consultationRows.reduce(
+        (sum, item) => sum + Number(item.count || 0),
+        0
+    );
+
+    const totalBeds = data.beds.reduce((sum, item) => sum + Number(item.total || 0), 0);
+    const totalOccupied = data.beds.reduce((sum, item) => sum + Number(item.occupied || 0), 0);
+    const overallOccupancy = totalBeds ? Math.round((totalOccupied / totalBeds) * 100) : 0;
+    // 6. Render the Dashboard once data is loaded successfully
+    return (
+        <div className="w-full min-h-screen bg-slate-100 p-2 font-sans text-slate-800 antialiased">
+            <div className="w-full border-4 border-blue-700 rounded-xl bg-white p-2">
+                {/* --- TOP BAR / HEADER --- */}
+                <header className="bg-white rounded-lg shadow-sm p-4 mb-3 grid grid-cols-1 lg:grid-cols-[1fr_auto_auto] items-center gap-6">
+                    <div className="flex items-center gap-4">
+                        <img
+                            src={settings?.hospital_logo || hospitalLogo}
+                            alt="Hospital Logo"
+                            className="w-20 h-16 object-contain border-0 border-blue-900"
+                        />
                         <div>
-                            <span className="text-xs uppercase font-bold text-emerald-600 tracking-wider">Female Patients</span>
-                            <h2 className="text-3xl font-extrabold text-slate-900 mt-0.5">{data.demographics.female.count}</h2>
-                            <p className="text-xs text-slate-400 font-medium">{data.demographics.female.percentage}% of Total Patients</p>
+                            <h1 className="text-2xl md:text-3xl leading-tight text-left font-black tracking-tight text-blue-900">
+                                {settings?.hospital_name || "ABC Hospital"}
+                            </h1>
+                            <p className="text-xs italic text-left font-medium text-emerald-600">Excellence in Care, Every Time</p>
                         </div>
                     </div>
-                    <div className="text-emerald-500 text-xs font-bold bg-emerald-50 px-2 py-1 rounded-md">📈 Spark</div>
-                </div>
 
-                {/* Male Patients */}
-                <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-rose-500 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center text-rose-500">
-                            <User className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <span className="text-xs uppercase font-bold text-rose-600 tracking-wider">Male Patients</span>
-                            <h2 className="text-3xl font-extrabold text-slate-900 mt-0.5">{data.demographics.male.count}</h2>
-                            <p className="text-xs text-slate-400 font-medium">{data.demographics.male.percentage}% of Total Patients</p>
-                        </div>
-                    </div>
-                    <div className="text-rose-500 text-xs font-bold bg-rose-50 px-2 py-1 rounded-md">📈 Spark</div>
-                </div>
+                    {/* Date Filter Controls */}
+                    <div className="flex flex-col items-end gap-3 text-xs">
 
-                {/* Total Patients */}
-                <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-600 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                            <Users className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <span className="text-xs uppercase font-bold text-blue-600 tracking-wider">Total Patients</span>
-                            <h2 className="text-3xl font-extrabold text-slate-900 mt-0.5">{data.demographics.total}</h2>
-                            <p className="text-xs text-slate-400 font-medium">100% of Total Patients</p>
-                        </div>
-                    </div>
-                    <div className="text-blue-600 text-xs font-bold bg-blue-50 px-2 py-1 rounded-md">📈 Spark</div>
-                </div>
+                        <div className="flex flex-col">
+                            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">
+                                Quick Filter
+                            </span>
 
-                {/* Insurance Coverage */}
-                <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-purple-600 flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
-                            <Shield className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <span className="text-xs uppercase font-bold text-purple-600 tracking-wider">Insurance Coverage</span>
-                            <h2 className="text-3xl font-extrabold text-slate-900 mt-0.5">{data.demographics.insuranceCoverage.percentage}%</h2>
-                            <p className="text-xs text-slate-400 font-medium">{data.demographics.insuranceCoverage.count} of {data.demographics.total} Patients</p>
-                        </div>
-                    </div>
-                    <div className="text-purple-600 text-xs font-bold bg-purple-50 px-2 py-1 rounded-md">📈 Spark</div>
-                </div>
-            </section>
-
-            {/* --- SECTION 2: PAYMENT TYPE GRAPHICS & METRICS --- */}
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
-                {/* Card 1: Patients by Payment Type (Donut Breakdown Simulation) */}
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
-                    <div className="bg-blue-900 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider">
-                        <PieChart className="w-4 h-4" /> Patients by Payment Type
-                    </div>
-                    <div className="p-6 flex flex-col items-center justify-center flex-1">
-                        {/* Mocking the dynamic circular chart layout */}
-                        <div className="relative w-40 h-40 rounded-full border-[16px] border-blue-600 flex flex-col items-center justify-center shadow-inner mb-6">
-                            <span className="text-2xl font-black text-slate-900">{data.demographics.total}</span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Total Patients</span>
-                        </div>
-                        <div className="w-full space-y-2 text-xs font-semibold">
-                            <div className="flex justify-between items-center text-blue-600">
-                                <span>🔵 Insurance Co-Pay: {data.paymentTypes.coPay.count}</span>
-                                <span>{data.paymentTypes.coPay.percentage}%</span>
-                            </div>
-                            <div className="flex justify-between items-center text-orange-500">
-                                <span>🟠 Insurance Non-Pay: {data.paymentTypes.nonPay.count}</span>
-                                <span>{data.paymentTypes.nonPay.percentage}%</span>
-                            </div>
-                            <div className="flex justify-between items-center text-emerald-600">
-                                <span>🟢 General / Non-Bima: {data.paymentTypes.general.count}</span>
-                                <span>{data.paymentTypes.general.percentage}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="border-t bg-slate-50 p-3 grid grid-cols-2 text-center text-xs font-bold divide-x divide-slate-200">
-                        <div className="text-blue-700">Insurance: 641 (87.3%)</div>
-                        <div className="text-slate-600">Non-Insurance: 92 (12.5%)</div>
-                    </div>
-                </div>
-
-                {/* Card 2: Patients by Payment Type & Gender (Stacked Bar Chart Simulation) */}
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
-                    <div className="bg-emerald-700 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider">
-                        <BarChart3 className="w-4 h-4" /> Patients by Payment Type & Gender
-                    </div>
-                    <div className="p-6 flex-1 flex flex-col justify-end">
-                        {/* Simple stacked column representation */}
-                        <div className="grid grid-cols-3 gap-4 items-end h-48 border-b border-l pb-2 px-2 border-slate-200 text-center">
-                            {/* Co-Pay Column */}
-                            <div className="flex flex-col items-center h-full justify-end">
-                                <span className="text-[10px] font-bold mb-1 text-slate-700">533</span>
-                                <div className="w-full bg-emerald-500 h-[65%] rounded-t-sm relative group">
-                                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">362</span>
-                                </div>
-                                <div className="w-full bg-rose-500 h-[30%] rounded-b-sm relative group">
-                                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">171</span>
-                                </div>
-                                <span className="text-[9px] font-bold text-slate-500 mt-2 truncate max-w-full">Co-Pay</span>
-                            </div>
-
-                            {/* Non-Pay Column */}
-                            <div className="flex flex-col items-center h-full justify-end">
-                                <span className="text-[10px] font-bold mb-1 text-slate-700">108</span>
-                                <div className="w-full bg-emerald-500 h-[20%] rounded-t-sm relative">
-                                    <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white">60</span>
-                                </div>
-                                <div className="w-full bg-rose-500 h-[15%] rounded-b-sm relative">
-                                    <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-white">48</span>
-                                </div>
-                                <span className="text-[9px] font-bold text-slate-500 mt-2 truncate max-w-full">Non-Pay</span>
-                            </div>
-
-                            {/* General Column */}
-                            <div className="flex flex-col items-center h-full justify-end">
-                                <span className="text-[10px] font-bold mb-1 text-slate-700">92</span>
-                                <div className="w-full bg-slate-400 h-[30%] rounded-t-sm relative">
-                                    <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white">92</span>
-                                </div>
-                                <span className="text-[9px] font-bold text-slate-500 mt-2 truncate max-w-full">General</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="border-t bg-slate-50 p-3 flex justify-center gap-6 text-xs font-bold">
-                        <span className="flex items-center gap-1.5 text-emerald-600">🟢 Female: 482 (66%)</span>
-                        <span className="flex items-center gap-1.5 text-rose-600">🔴 Male: 252 (34%)</span>
-                    </div>
-                </div>
-
-                {/* Card 3: Patient Breakdown Totals Progress Horizontal Bars */}
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
-                    <div className="bg-orange-600 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider">
-                        <ClipboardList className="w-4 h-4" /> Patients by Payment Type (Total)
-                    </div>
-                    <div className="p-6 space-y-5 flex-1 justify-center flex flex-col">
-                        {/* Progress Row 1 */}
-                        <div>
-                            <div className="flex justify-between items-center text-xs font-bold mb-1.5">
-                                <span className="text-slate-700">Insurance Co-Pay</span>
-                                <span className="text-blue-700">533 <span className="text-slate-400 font-normal">(72.6%)</span></span>
-                            </div>
-                            <div className="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden">
-                                <div className="bg-blue-600 h-full rounded-full" style={{ width: '72.6%' }}></div>
-                            </div>
-                        </div>
-                        {/* Progress Row 2 */}
-                        <div>
-                            <div className="flex justify-between items-center text-xs font-bold mb-1.5">
-                                <span className="text-slate-700">Insurance Non-Pay</span>
-                                <span className="text-orange-600">108 <span className="text-slate-400 font-normal">(14.7%)</span></span>
-                            </div>
-                            <div className="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden">
-                                <div className="bg-orange-500 h-full rounded-full" style={{ width: '14.7%' }}></div>
-                            </div>
-                        </div>
-                        {/* Progress Row 3 */}
-                        <div>
-                            <div className="flex justify-between items-center text-xs font-bold mb-1.5">
-                                <span className="text-slate-700">General / Non-Bima</span>
-                                <span className="text-emerald-700">92 <span className="text-slate-400 font-normal">(12.5%)</span></span>
-                            </div>
-                            <div className="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden">
-                                <div className="bg-emerald-500 h-full rounded-full" style={{ width: '12.5%' }}></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="border-t bg-amber-50 p-3 text-center text-sm font-black text-amber-900 flex items-center justify-center gap-2">
-                        <Users className="w-4 h-4 text-amber-700" /> Total Patients: {data.demographics.total}
-                    </div>
-                </div>
-            </section>
-
-            {/* --- SECTION 3: TABULAR CORE HOSPITAL LOGISTICS --- */}
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                {/* Table 1: Diagnostic Services */}
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
-                    <div className="bg-purple-900 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider">
-                        <Activity className="w-4 h-4" /> Diagnostic Services
-                    </div>
-                    <div className="p-2 flex-1 overflow-auto max-h-[340px]">
-                        <table className="w-full text-xs text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
-                                    <th className="p-2.5">Particulars</th>
-                                    <th className="p-2.5 text-right">Number</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
-                                {data.diagnostics.map((item, idx) => (
-                                    <tr key={idx} className="hover:bg-slate-50 transition">
-                                        <td className="p-2">{item.name}</td>
-                                        <td className="p-2 text-right font-bold text-slate-900">{item.count}</td>
-                                    </tr>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { key: "today", label: "Today" },
+                                    { key: "yesterday", label: "Yesterday" },
+                                    { key: "this_week", label: "This Week" },
+                                    { key: "last_7_days", label: "Last 7 Days" },
+                                    { key: "this_month", label: "This Month" },
+                                ].map((item) => (
+                                    <button
+                                        key={item.key}
+                                        onClick={() => applyDatePreset(item.key)}
+                                        className={`px-3 py-2 rounded-lg font-bold transition ${selectedPreset === item.key
+                                            ? "bg-blue-600 text-white"
+                                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                            }`}
+                                    >
+                                        {item.label}
+                                    </button>
                                 ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="border-t bg-purple-50 p-3 text-center text-xs font-black text-purple-900">
-                        Total Tests: 1,707
-                    </div>
-                </div>
+                            </div>
+                        </div>
+                        {/* Row 2: From Date, To Date, Refresh */}
+                        <div className="flex flex-wrap items-end gap-3">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">
+                                    From Date
+                                </span>
 
-                {/* Table 2: Consultations */}
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
-                    <div className="bg-teal-700 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider">
-                        <Users className="w-4 h-4" /> Consultations
+                                <div className="flex items-center gap-2 border rounded-lg px-3 py-2 bg-slate-50">
+                                    <Calendar className="w-4 h-4 text-slate-400" />
+                                    <input
+                                        type="date"
+                                        value={fromDate}
+                                        onChange={(e) => {
+                                            setFromDate(e.target.value);
+                                            setSelectedPreset("custom");
+                                        }}
+                                        className="bg-transparent outline-none font-semibold text-slate-700"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col">
+                                <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">
+                                    To Date
+                                </span>
+
+                                <div className="flex items-center gap-2 border rounded-lg px-3 py-2 bg-slate-50">
+                                    <Calendar className="w-4 h-4 text-slate-400" />
+                                    <input
+                                        type="date"
+                                        value={toDate}
+                                        onChange={(e) => {
+                                            setToDate(e.target.value);
+                                            setSelectedPreset("custom");
+                                        }}
+                                        className="bg-transparent outline-none font-semibold text-slate-700"
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => fetchDashboardData(fromDate, toDate)}
+                                className="bg-blue-600 hover:bg-blue-700 transition text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 shadow-sm shadow-blue-200"
+                            >
+                                <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                            </button>
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">
+                                Auto Refresh
+                            </span>
+
+                            <div className="flex items-center gap-2">
+                                {lastUpdated && (
+                                    <span className="text-[10px] text-slate-700 font-bold">
+                                        Last Updated: {lastUpdated}
+                                    </span>
+                                )}
+                                <select
+                                    value={refreshSeconds}
+                                    onChange={(e) => setRefreshSeconds(Number(e.target.value))}
+                                    className="border rounded-lg px-3 py-2 bg-slate-50 font-semibold text-slate-700 outline-none"
+                                >
+                                    <option value={10}>10 sec</option>
+                                    <option value={30}>30 sec</option>
+                                    <option value={60}>1 min</option>
+                                    <option value={300}>5 min</option>
+                                </select>
+
+                                <button
+                                    onClick={() => setAutoRefresh(!autoRefresh)}
+                                    className={`px-3 py-2 rounded-lg font-bold ${autoRefresh
+                                        ? "bg-emerald-600 text-white"
+                                        : "bg-slate-200 text-slate-600"
+                                        }`}
+                                >
+                                    {autoRefresh ? "ON" : "OFF"}
+                                </button>
+
+                            </div>
+                        </div>
                     </div>
-                    <div className="p-2 flex-1 overflow-auto max-h-[340px]">
-                        <table className="w-full text-xs text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
-                                    <th className="p-2.5">Particulars</th>
-                                    <th className="p-2.5 text-right">Number</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
-                                {data.consultations.map((item, idx) => (
-                                    <tr key={idx} className="hover:bg-slate-50 transition">
-                                        <td className="p-2 truncate max-w-[140px]">{item.name}</td>
-                                        <td className="p-2 text-right font-bold text-slate-900">{item.count}</td>
-                                    </tr>
+                    <img
+                        src={settings?.company_logo || companyLogo}
+                        alt="Company Logo"
+                        className="w-25 h-20 object-contain border-0 border-blue-900"
+                    />
+                </header>
+
+                {/* --- SECTION 1: TOP SUMMARY KPI CARDS --- */}
+                <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex items-center gap-4">
+
+                        <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-blue"><Users className="w-6 h-6" /></div>
+                        <div>
+                            <span className="text-xs uppercase font-black text-blue-700">Total Patients</span>
+                            <h2 className="text-4xl font-black text-blue-700">{data.demographics.total}</h2>
+                            <p className="text-xs text-slate-500 font-semibold">100% of Total Patients</p>
+
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex items-center gap-4">
+
+                        <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center text-purple"><Shield className="w-6 h-6" /></div>
+                        <div>
+                            <span className="text-xs uppercase font-black text-purple-700">Health Insurance</span>
+                            <h2 className="text-4xl font-black text-purple-700">{data.demographics.insuranceCoverage.percentage}%</h2>
+                            <p className="text-xs text-slate-500 font-semibold">{data.demographics.insuranceCoverage.count} of {data.demographics.total} Patients</p>
+                        </div>
+
+                    </div>
+
+                    <div className="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex items-center gap-4">
+
+                        <div className="w-16 h-16 rounded-full bg-emerald-600 flex items-center justify-center text-white"><User className="w-6 h-6" /></div>
+                        <div>
+                            <span className="text-xs uppercase font-black text-emerald-700">Female Patients</span>
+                            <h2 className="text-4xl font-black text-emerald-700">{data.demographics.female.count}</h2>
+                            <p className="text-xs text-slate-500 font-semibold">{data.demographics.female.percentage}% of Total Patients</p>
+                        </div>
+
+                    </div>
+
+                    <div className="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex items-center gap-4">
+
+                        <div className="w-16 h-16 rounded-full bg-rose-600 flex items-center justify-center text-rose"><User className="w-6 h-6" /></div>
+                        <div>
+                            <span className="text-xs uppercase font-black text-rose-700">Male Patients</span>
+                            <h2 className="text-4xl font-black text-rose-700">{data.demographics.male.count}</h2>
+                            <p className="text-xs text-slate-500 font-semibold">{data.demographics.male.percentage}% of Total Patients</p>
+                        </div>
+
+                    </div>
+                </section>
+
+                {/* --- SECTION 2: PAYMENT TYPE GRAPHICS & METRICS --- */}
+                <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
+                        <div className="bg-blue-900 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider">
+                            <PieChartIcon className="w-4 h-4" /> Patients by Payment Type
+                        </div>
+                        <div className="p-4 flex flex-col items-center justify-center flex-1">
+                            <PaymentTypePatPieData />
+                            <div className="w-full space-y-2 text-xs font-semibold mt-4">
+                                {paymentPieData.map((item, index) => (
+                                    <div key={item.name} className="flex justify-between items-center text-slate-700">
+                                        <span>
+                                            <span
+                                                className="inline-block w-2 h-2 rounded-full mr-2"
+                                                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                            />
+                                            {item.name}: {item.value}
+                                        </span>
+                                        <span>{item.percentage}%</span>
+                                    </div>
                                 ))}
-                            </tbody>
-                        </table>
+                            </div>
+                        </div>
                     </div>
-                    <div className="border-t bg-teal-50 p-3 text-center text-xs font-black text-teal-900">
-                        Total Consultations: 805
-                    </div>
-                </div>
 
-                {/* Table 3: Bed Occupancy */}
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
-                    <div className="bg-rose-600 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider">
-                        <Bed className="w-4 h-4" /> Bed Occupancy
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
+                        <div className="bg-emerald-700 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider">
+                            <BarChart3 className="w-4 h-4" /> Patients by Payment Type & Gender
+                        </div>
+                        <div className="p-4 flex-1 flex flex-col justify-end">
+                            <div className="w-full h-80">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart
+                                        data={paymentChartData}
+                                        margin={{ top: 10, right: 10, left: -20, bottom: 20 }}
+                                    >
+                                        <Legend wrapperStyle={{ fontSize: "12px" }} />
+
+                                        <Bar dataKey="female" stackId="patients" fill="#10b981" name="Female" />
+                                        <Bar dataKey="male" stackId="patients" fill="#f43f5e" name="Male" />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+
+                                        <XAxis
+                                            dataKey="name"
+                                            tick={{ fontSize: 10, fontWeight: 1000 }}
+                                            angle={-15}
+                                            textAnchor="end"
+                                            interval={0}
+                                        />
+
+                                        <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+
+                                        <Tooltip
+                                            formatter={(value, name) => {
+                                                if (name === "female") return [value, "Female"];
+                                                if (name === "male") return [value, "Male"];
+                                                if (name === "total") return [value, "Total"];
+                                                return [value, name];
+                                            }}
+                                        />
+                                    </BarChart>
+                                </ResponsiveContainer>
+
+                            </div>
+                        </div>
                     </div>
-                    <div className="p-2 flex-1 overflow-auto max-h-[340px]">
-                        <table className="w-full text-xs text-left border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50 border-b border-slate-200 text-slate-400 font-bold uppercase text-[10px]">
-                                    <th className="p-2">Particulars</th>
-                                    <th className="p-2 text-center">Total</th>
-                                    <th className="p-2 text-center">Occ</th>
-                                    <th className="p-2 text-center">Vac</th>
-                                    <th className="p-2 text-right">Occ %</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
-                                {data.beds.map((bed, idx) => (
-                                    <tr key={idx} className="hover:bg-slate-50 transition">
-                                        <td className="p-2 font-bold">{bed.name}</td>
-                                        <td className="p-2 text-center">{bed.total}</td>
-                                        <td className="p-2 text-center text-amber-600">{bed.occupied}</td>
-                                        <td className="p-2 text-center text-emerald-600">{bed.vacant}</td>
-                                        <td className="p-2 text-right font-bold text-slate-900">{bed.pct}%</td>
+
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
+                        <div className="bg-orange-600 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider">
+                            <ClipboardList className="w-4 h-4" /> Patients by Payment Type (Total)
+                        </div>
+
+                        <div className="p-6 space-y-4 flex-1 justify-center flex flex-col">
+                            {Object.entries(data.paymentTypes || {}).map(([key, value], index) => {
+                                const count = value.count || 0;
+                                const percentage = value.percentage ?? value.Percentage ?? 0;
+
+                                const barColors = [
+                                    "bg-blue-600",
+                                    "bg-emerald-500",
+                                    "bg-orange-500",
+                                    "bg-purple-500",
+                                    "bg-rose-500",
+                                ];
+
+                                return (
+                                    <div className="flex items-center gap-3" key={key}>
+                                        <div className={`${barColors[index % barColors.length]} w-10 h-10 rounded-full flex items-center justify-center text-white`}>
+                                            <ClipboardList className="w-5 h-5" />
+                                        </div>
+
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-center text-xs font-bold mb-1.5">
+                                                <span className="text-slate-700 truncate max-w-[160px]">{key}</span>
+                                                <span className="text-slate-900">{count}</span>
+                                            </div>
+
+                                            <div className="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`${barColors[index % barColors.length]} h-full rounded-full`}
+                                                    style={{ width: `${percentage}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-right text-xs font-bold text-slate-600 w-12">
+                                            {percentage}%
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </section>
+
+                {/* --- SECTION 3: TABULAR LOGISTICS --- */}
+                <section className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Diagnostic Services */}
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
+                        <div className="bg-purple-900 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider"><Activity className="w-4 h-4" /> Diagnostic Services</div>
+                        <div className="p-2 flex-1 overflow-auto max-h-[1000px]">
+                            <table className="w-full text-xs text-left border-collapse">
+                                <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                                    {data.diagnostics.map((item, idx) => (
+                                        <tr key={idx} className="hover:bg-slate-50 transition">
+                                            <td className="p-2">{item.name}</td>
+                                            <td className="p-2 text-right font-bold text-slate-900">{item.count}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="m-2 mt-3 bg-purple-50 border border-purple-100 rounded-lg p-3 text-center font-black text-purple-700">
+                            Total Tests&nbsp;&nbsp; {totalDiagnostics}
+                        </div>
+                    </div>
+
+                    {/* Consultations */}
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
+                        <div className="bg-teal-700 px-4 py-3 text-white font-bold text-xs uppercase flex items-top gap-2 tracking-wider">
+                            <Users className="w-4 h-4" /> Consultations
+                        </div>
+
+                        <div className="p-2 flex-1 overflow-auto max-h-[1000px]">
+                            <table className="w-full text-xs text-left border-collapse">
+                                <thead className="bg-slate-100 sticky top-0 z-10">
+                                    <tr className="text-slate-600 uppercase text-[10px]">
+                                        <th className="p-2 text-left">Department</th>
+                                        <th className="p-2 text-right">Male</th>
+                                        <th className="p-2 text-right">Female</th>
+                                        <th className="p-2 text-right">Total</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+
+                                <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                                    {consultationRows.map((item, idx) => (
+                                        <tr key={idx} className="hover:bg-slate-50 transition">
+                                            <td className="p-2 truncate max-w-[140px]">{item.name}</td>
+                                            <td className="p-2 text-right text-rose-600 font-bold">{item.male}</td>
+                                            <td className="p-2 text-right text-emerald-600 font-bold">{item.female}</td>
+                                            <td className="p-2 text-right font-bold text-slate-900">{item.count}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="m-2 mt-3 bg-teal-50 border border-teal-100 rounded-lg p-3 text-center font-black text-teal-700">
+                            Total Consultations&nbsp;&nbsp; {totalConsultations}
+                        </div>
                     </div>
-                    <div className="border-t bg-rose-50 p-3 flex justify-between items-center text-xs font-black text-rose-900 px-4">
-                        <span>Overall Occupancy</span>
-                        <span className="text-sm font-extrabold text-rose-700">32%</span>
+                    {/* Bed Occupancy */}
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
+                        <div className="bg-rose-600 px-4 py-3 text-white font-bold text-xs uppercase flex items-center gap-2 tracking-wider"><Bed className="w-4 h-4" /> Bed Occupancy</div>
+                        <div className="p-2 flex-1 overflow-auto max-h-[1000px]">
+                            <table className="w-full text-xs text-left border-collapse">
+                                <thead className="bg-slate-100 sticky top-0 z-10">
+                                    <tr className="text-slate-600 uppercase text-[10px]">
+                                        <th className="p-2 text-left">Department</th>
+                                        <th className="p-2 text-right">Total</th>
+                                        <th className="p-2 text-right">Occupied</th>
+                                        <th className="p-2 text-right">Vacant</th>
+                                        <th className="p-2 text-right">PCT</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                                    {data.beds.map((bed, idx) => (
+                                        <tr key={idx} className="hover:bg-slate-50 transition">
+                                            <td className="p-2 font-bold">{bed.name}</td>
+                                            <td className="p-2 text-center text-amber-600">{bed.total}</td>
+                                            <td className="p-2 text-center text-amber-600">{bed.occupied}</td>
+                                            <td className="p-2 text-center text-emerald-600">{bed.vacant}</td>
+                                            <td className="p-2 text-right font-bold text-slate-900">{bed.pct}%</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="m-2 mt-3 bg-rose-50 border border-rose-100 rounded-lg p-3 text-center font-black text-rose-700">
+                            Overall Occupancy&nbsp;&nbsp; {overallOccupancy}%
+                        </div>
+                    </div>
+                </section>
+            </div>
+            {settings?.show_footer !== false && (
+                <div className="marquee-container">
+                    <div className="marquee-text">
+                        {settings?.marquee_text || "Powered by D-Code Technology Pvt. Ltd."}
                     </div>
                 </div>
-
-            </section>
+            )}
         </div>
     );
 }

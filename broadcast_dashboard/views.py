@@ -1,3 +1,10 @@
+import json
+import os
+from django.contrib.auth import authenticate, login, logout
+from django.core.files.storage import default_storage
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
+from django.views.decorators.http import require_GET, require_POST
 from django.shortcuts import render
 from django.http import JsonResponse
 
@@ -8,11 +15,172 @@ from datetime import date, timedelta,datetime
 import traceback
 import logging
 
-from common.models import Tblpatbilldetail,Tbltestlimit, Tblpatlabsubtest, Tblpatlabtest, Tblconsult, Tblpatientdate, Tblpatientinfo, Tbldepartmentbed, Tblencounter,Tblpatbilling,Tblhmissetting
+from .models import default_dashboard_settings, DashboardSetting
+from common.models import Tblconsult, Tbldepartmentbed,Tblpatbilling,Tblhmissetting
 
 logger =logging.getLogger(__name__)
 
-# Create your views here.
+#Dashboard Helper function
+def get_main_dashboard_setting():
+    setting, created = DashboardSetting.objects.get_or_create(
+        key="main",
+        defaults={"value": default_dashboard_settings()}
+    )
+
+    # Merge future new settings automatically
+    default_value = default_dashboard_settings()
+    current_value = setting.value or {}
+
+    merged_value = {
+        **default_value,
+        **current_value,
+    }
+
+    if merged_value != current_value:
+        setting.value = merged_value
+        setting.save(update_fields=["value", "updated_at"])
+
+    return setting
+
+#CSRF endpoint
+
+@ensure_csrf_cookie
+@require_GET
+def csrf_token(request):
+    return JsonResponse({
+        "csrfToken": get_token(request)
+    })
+
+# Auth status
+@require_GET
+def auth_status(request):
+    return JsonResponse({
+        "authenticated": request.user.is_authenticated,
+        "username": request.user.username if request.user.is_authenticated else "",
+        "is_staff": request.user.is_staff if request.user.is_authenticated else False,
+    })
+
+# Login Api
+@csrf_protect
+@require_POST
+def login_api(request):
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        payload = {}
+
+    username = payload.get("username")
+    password = payload.get("password")
+
+    user = authenticate(request, username=username, password=password)
+
+    if user is None:
+        return JsonResponse({
+            "success": False,
+            "error": "Invalid username or password"
+        }, status=400)
+
+    if not user.is_staff:
+        return JsonResponse({
+            "success": False,
+            "error": "You do not have permission to access dashboard settings"
+        }, status=403)
+
+    login(request, user)
+
+    return JsonResponse({
+        "success": True,
+        "username": user.username,
+        "is_staff": user.is_staff,
+    })
+
+#Logout API
+@csrf_protect
+@require_POST
+def logout_api(request):
+    logout(request)
+
+    return JsonResponse({
+        "success": True
+    })
+
+# Setting API
+def dashboard_settings(request):
+    setting = get_main_dashboard_setting()
+
+    if request.method == "GET":
+        return JsonResponse(setting.value)
+
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                "error": "Login required"
+            }, status=401)
+
+        if not request.user.is_staff:
+            return JsonResponse({
+                "error": "Permission denied"
+            }, status=403)
+
+        value = setting.value or default_dashboard_settings()
+
+        editable_text_fields = [
+            "hospital_name",
+            "company_name",
+            "theme_color",
+            "marquee_text",
+        ]
+
+        for field in editable_text_fields:
+            if field in request.POST:
+                value[field] = request.POST.get(field)
+
+        if "auto_refresh_seconds" in request.POST:
+            try:
+                value["auto_refresh_seconds"] = int(request.POST.get("auto_refresh_seconds"))
+            except Exception:
+                value["auto_refresh_seconds"] = 30
+
+        if "show_footer" in request.POST:
+            value["show_footer"] = request.POST.get("show_footer") in ["true", "1", "yes", "on"]
+
+        logo_fields = ["hospital_logo", "company_logo"]
+
+        for field in logo_fields:
+            uploaded_file = request.FILES.get(field)
+
+            if uploaded_file:
+                content_type = uploaded_file.content_type or ""
+
+                if not content_type.startswith("image/"):
+                    return JsonResponse({
+                        "error": f"{field} must be an image file"
+                    }, status=400)
+
+                _, ext = os.path.splitext(uploaded_file.name)
+                ext = ext.lower() or ".png"
+
+                file_path = f"dashboard/logos/{field}{ext}"
+
+                if default_storage.exists(file_path):
+                    default_storage.delete(file_path)
+
+                saved_path = default_storage.save(file_path, uploaded_file)
+                value[field] = default_storage.url(saved_path)
+
+        setting.value = value
+        setting.save()
+
+        return JsonResponse({
+            "success": True,
+            "settings": setting.value
+        })
+
+    return JsonResponse({
+        "error": "Method not allowed"
+    }, status=405)
+
+# Dashboard Stats Function Based View
 def dashboard_stats(request):
     try:
         # Mocking your core database metrics
@@ -287,7 +455,7 @@ def dashboard_stats(request):
                 })
         except Exception as e:
             print(f"Error in bed occupancy: {e}")
-            bed = []
+            beds = []
 
         data = {
             "dateFrom": start_date,

@@ -19,7 +19,7 @@
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  font: 20px/100% var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);
@@ -32,6 +32,10 @@
   @media (max-width: 1024px) {
     font-size: 16px;
   }
+
+  @media (max-width: 1920px) {
+    font-size: 25px;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -40,7 +44,7 @@
     --text-h: #f3f4f6;
     --bg: #16171d;
     --border: #2e303a;
-    --code-bg: #1f2028;
+    --code-bg: #bdc0d3;
     --accent: #c084fc;
     --accent-bg: rgba(192, 132, 252, 0.15);
     --accent-border: rgba(192, 132, 252, 0.5);
