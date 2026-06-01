@@ -35,7 +35,7 @@ export default function HospitalDashboard() {
       params.append("to_date", to);
     }
 
-    const url = `http://192.168.1.72:8000/dash/?${params.toString()}`;
+    const url = `dash/?${params.toString()}`;
 
     // Replace with your actual Django server URL if different
     fetch(url)

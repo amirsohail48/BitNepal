@@ -26,6 +26,8 @@ mediafiles/
 node_modules/
 build/
 dist/
+frontend/node_modules/
+frontend/dist/
 .next/
 out/
 *.local
@@ -43,6 +45,7 @@ yarn-error.log*
 
 # Environment
 .env
+*.env
 .env.local
 .env.*.local
 

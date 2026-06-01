@@ -9,21 +9,25 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+env_path = BASE_DIR / '.env'
+load_dotenv(env_path)
+# Or simply load from current directory
+load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-5pd6uy^hh#u!s2^fu6*sstknp8ad1mkr)rly&8u-m443^@n)36'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")#'django-insecure-5pd6uy^hh#u!s2^fu6*sstknp8ad1mkr)rly&8u-m443^@n)36'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG")
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -86,11 +90,11 @@ WSGI_APPLICATION = 'healthybit.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME' : 'Amdadb',
-        'HOST' : '127.0.0.1',
-        'USER' : 'admin',
-        'PASSWORD' : 'admin',
-        'port' : '3306',
+        'NAME' : os.getenv("DB_NAME"),
+        'HOST' : os.getenv("DB_HOST"),
+        'USER' : os.getenv("DB_USER"),
+        'PASSWORD' : os.getenv("DB_PASSWORD"),
+        'PORT' : '3306',
     }
 }
 
