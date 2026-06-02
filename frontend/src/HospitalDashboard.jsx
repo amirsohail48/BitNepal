@@ -57,7 +57,7 @@ export default function HospitalDashboard() {
             params.append("to_date", to);
         }
 
-        const url = `/dashboard/?${params.toString()}`;
+        const url = `/dash/?${params.toString()}`;
 
         // Replace with your actual Django server URL if different
         fetch(url)
@@ -89,7 +89,7 @@ export default function HospitalDashboard() {
 
     // 3. Run the fetch function automatically when the component mounts
     useEffect(() => {
-        fetch("/dashboard/settings/")
+        fetch("/dash/settings/")
             .then((res) => res.json())
             .then((data) => setSettings(data))
             .catch((err) => console.error("Settings fetch error:", err));

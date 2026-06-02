@@ -49,13 +49,13 @@ export default function AdminSettings() {
     const [loading, setLoading] = useState(false);
 
     const prepareCsrf = async () => {
-        await fetch("/dashboard/csrf/", {
+        await fetch("/dash/csrf/", {
             credentials: "include",
         });
     };
 
     const fetchAuthStatus = async () => {
-        const response = await fetch("/dashboard/auth/status/", {
+        const response = await fetch("/dash/auth/status/", {
             credentials: "include",
         });
 
@@ -64,7 +64,7 @@ export default function AdminSettings() {
     };
 
     const fetchSettings = async () => {
-        const response = await fetch("/dashboard/settings/", {
+        const response = await fetch("/dash/settings/", {
             credentials: "include",
         });
 
@@ -100,7 +100,7 @@ export default function AdminSettings() {
         try {
             await prepareCsrf();
 
-            const response = await fetch("/dashboard/auth/login/", {
+            const response = await fetch("/dash/auth/login/", {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -130,7 +130,7 @@ export default function AdminSettings() {
         setMessage("");
 
         try {
-            await fetch("/dashboard/auth/logout/", {
+            await fetch("/dash/auth/logout/", {
                 method: "POST",
                 credentials: "include",
                 headers: {
@@ -196,7 +196,7 @@ export default function AdminSettings() {
         try {
             await prepareCsrf();
 
-            const response = await fetch("/dashboard/settings/", {
+            const response = await fetch("/dash/settings/", {
                 method: "POST",
                 credentials: "include",
                 headers: {
