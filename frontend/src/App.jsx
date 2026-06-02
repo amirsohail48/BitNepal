@@ -1,3 +1,4 @@
+// App.jsx
 import React from "react";
 import HospitalDashboard from "./HospitalDashboard";
 import AdminSettings from "./AdminSettings";

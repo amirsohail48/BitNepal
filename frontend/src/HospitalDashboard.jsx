@@ -90,8 +90,18 @@ export default function HospitalDashboard() {
     // 3. Run the fetch function automatically when the component mounts
     useEffect(() => {
         fetch("/dash/settings/")
-            .then((res) => res.json())
-            .then((data) => setSettings(data))
+            .then(async (res) => {
+                const text = await res.text();
+                try {
+                    return JSON.parse(text);
+                } catch {
+                    console.error("Settings returned non-JSON:", text);
+                    return null;
+                }
+            })
+            .then((data) => {
+                if (data) setSettings(data);
+            })
             .catch((err) => console.error("Settings fetch error:", err));
     }, []);
 
@@ -252,13 +262,13 @@ export default function HospitalDashboard() {
         percentage: value.percentage ?? value.Percentage ?? 0,
     }));
     //Departmentwise Bed Occupancy
-    const bedoccupancy = Object.entries(data.beds || {}).map(([value]) => ({
-        dept: value.name || 0,
-        total: value.total || 0,
-        occupied: value.occupied || 0,
-        vacant: value.vacant || 0,
-        pct: value.pct || 0
-    }))
+    // const bedoccupancy = Object.entries(data.beds || {}).map(([value]) => ({
+    //     dept: value.name || 0,
+    //     total: value.total || 0,
+    //     occupied: value.occupied || 0,
+    //     vacant: value.vacant || 0,
+    //     pct: value.pct || 0
+    // }))
     const totalDiagnostics = data.diagnostics.reduce(
         (sum, item) => sum + Number(item.count || 0),
         0

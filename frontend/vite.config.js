@@ -1,3 +1,4 @@
+// viteReact.config.js
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
@@ -9,6 +10,10 @@ export default defineConfig({
     port: 5173,
     strictPort: true,  // Fail if port 5173 is already in use
     proxy: {
+      "/dash": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
+      },
       "/dashboard": {
         target: "http://127.0.0.1:8000",
         changeOrigin: true,

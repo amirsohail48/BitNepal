@@ -19,6 +19,7 @@ RUN pip install -r requirements.txt
 
 COPY . /app/
 
-RUN python manage.py collectstatic --noinput || true
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-CMD ["gunicorn", "healthybit.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+CMD ["/entrypoint.sh"]

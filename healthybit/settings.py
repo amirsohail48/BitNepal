@@ -1,3 +1,4 @@
+# settings.py
 """
 Django settings for healthybit project.
 
@@ -24,10 +25,10 @@ load_dotenv()
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")#'django-insecure-5pd6uy^hh#u!s2^fu6*sstknp8ad1mkr)rly&8u-m443^@n)36'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-dev-key")#'django-insecure-5pd6uy^hh#u!s2^fu6*sstknp8ad1mkr)rly&8u-m443^@n)36'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DJANGO_DEBUG")
+DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -135,7 +136,7 @@ USE_TZ = True
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
     BASE_DIR / "registration/static",
@@ -158,21 +159,23 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://192.168.1.72:5173",
+
     "http://127.0.0.1:8080",
     "http://localhost:8080",
+    "http://192.168.1.72:8080",
 ]
+
+CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:5173",
+    "http://192.168.1.72:5173",
 
     "http://127.0.0.1:8080",
     "http://localhost:8080",
+    "http://192.168.1.72:8080",
 
     "http://127.0.0.1:8000",
     "http://localhost:8000",
-
-    # production server/domain
-    "http://your-domain.com",
-    "https://your-domain.com",
 ]

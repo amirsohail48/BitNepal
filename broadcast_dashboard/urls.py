@@ -1,7 +1,6 @@
+# broadcast_dashboard/urls.py
 from django.urls import path
 from . import views
-from django.conf import settings
-from django.conf.urls.static import static
 
 urlpatterns = [
     path("", views.dashboard_stats, name="dashboard_stats"),
@@ -13,7 +12,3 @@ urlpatterns = [
     path("auth/login/", views.login_api, name="login_api"),
     path("auth/logout/", views.logout_api, name="logout_api"),
 ]
-
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

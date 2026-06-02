@@ -1,3 +1,4 @@
+// AdminSetting.jsx
 import React, { useEffect, useState } from "react";
 import { Building2, Image, LogIn, LogOut, Save, Upload } from "lucide-react";
 
