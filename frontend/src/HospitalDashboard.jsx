@@ -413,11 +413,13 @@ export default function HospitalDashboard() {
                             </div>
                         </div>
                     </div>
+
                     <img
-                        src={settings?.company_logo || companyLogo}
-                        alt="Company Logo"
-                        className="w-25 h-20 object-contain border-0 border-blue-900"
+                        src={companyLogo}
+                        alt="D-Code Technology Logo"
+                        className="w-18 h-16 object-cover border-0 border-blue-900 shadow-sm"
                     />
+
                 </header>
 
                 {/* --- SECTION 1: TOP SUMMARY KPI CARDS --- */}
