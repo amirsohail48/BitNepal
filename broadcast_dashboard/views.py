@@ -10,13 +10,15 @@ from django.http import JsonResponse
 
 from django.db.models import Sum,Q,Count,Subquery
 from django.utils import timezone
-from django.db import connection
+from django.db import connections
 from datetime import date, timedelta,datetime
 import traceback
 import logging
 
 from .models import default_dashboard_settings, DashboardSetting
 from common.models import Tblconsult, Tbldepartmentbed,Tblpatbilling,Tblhmissetting
+
+LEGACY_DB = "common"
 
 logger =logging.getLogger(__name__)
 
@@ -210,7 +212,7 @@ def dashboard_stats(request):
         
         try:
 
-            total_patients = Tblconsult.objects.filter(fldconsulttime__gte=start_date, fldconsulttime__lte=end_date).count()
+            total_patients = Tblconsult.objects.using(LEGACY_DB).filter(fldconsulttime__gte=start_date, fldconsulttime__lte=end_date).count()
             print (f"Total Patient: {total_patients}")
         except Exception as db_error:
             print(f"Database error in total_patients: {db_error}")
@@ -219,15 +221,15 @@ def dashboard_stats(request):
         if total_patients == 0:
             total_patients = 900
 
-        insurance_patients = Tblconsult.objects.filter(fldconsulttime__gte=start_date, fldconsulttime__lte=end_date, fldbillingmode="Health Insurance").count()
+        insurance_patients = Tblconsult.objects.using(LEGACY_DB).filter(fldconsulttime__gte=start_date, fldconsulttime__lte=end_date, fldbillingmode="Health Insurance").count()
         insurance_percentage = int((insurance_patients / total_patients) * 100) if total_patients else 0
 
         #Get consultation counts by gender
         def get_gender_counts(start_date,end_date):
             try:
-                from django.db import connection
+                from django.db import connections
                 
-                with connection.cursor() as cursor:
+                with connections[LEGACY_DB].cursor() as cursor:
                     cursor.execute("""
                         SELECT
                             c.fldconsultname AS dept, 
@@ -286,7 +288,7 @@ def dashboard_stats(request):
             
         def get_insurance_counts(start_date,end_date):
             try:
-                with connection.cursor() as cursor:
+                with connections[LEGACY_DB].cursor() as cursor:
                     cursor.execute("""
                         SELECT 
                             COALESCE(e.flddisctype, 'Unknown') AS disctype,
@@ -355,7 +357,7 @@ def dashboard_stats(request):
         
         #DepartmentWise Count
         try:
-            departwise_count = Tblconsult.objects.filter(
+            departwise_count = Tblconsult.objects.using(LEGACY_DB).filter(
                 fldconsulttime__gte=start_date-timedelta(days=20),
                 fldconsulttime__lte=end_date
                 ).values('fldconsultname').annotate(cnt=Count('fldid')).order_by('fldconsultname')
@@ -384,7 +386,7 @@ def dashboard_stats(request):
             'Transcranial Magnetic Simulation (TMS)']
 
         def get_diagnostic_services_subquery(catergory_val):
-            return Tblhmissetting.objects.filter(
+            return Tblhmissetting.objects.using(LEGACY_DB).filter(
                 fldtype='DiagnosticServices',
                 fldcategory=catergory_val
             ).values('fldvalue')
@@ -394,7 +396,7 @@ def dashboard_stats(request):
 
         try:
             for item in diagnostic_qty:
-                billing_qty = Tblpatbilling.objects.filter(
+                billing_qty = Tblpatbilling.objects.using(LEGACY_DB).filter(
                     fldtime__gte=start_date-timedelta(days=20),
                     fldtime__lte=end_date,
                     flditemname__in=Subquery(get_diagnostic_services_subquery(item)),
@@ -404,7 +406,7 @@ def dashboard_stats(request):
                 service_count[item] = billing_qty or 0
 
             for item1 in diagnostic_item:
-                result = Tblpatbilling.objects.filter(
+                result = Tblpatbilling.objects.using(LEGACY_DB).filter(
                     fldtime__gte = start_date-timedelta(days=20),
                     fldtime__lte = end_date,
                     flditemname__in = Subquery(get_diagnostic_services_subquery(item1)),
@@ -416,7 +418,7 @@ def dashboard_stats(request):
                 else:
                     item_count[item1] = count
             
-            lab_result = Tblpatbilling.objects.filter(
+            lab_result = Tblpatbilling.objects.using(LEGACY_DB).filter(
                 fldtime__gte = start_date-timedelta(days=20),
                 fldtime__lte = end_date,
                 flditemtype = 'Diagnostic Tests',
@@ -430,7 +432,7 @@ def dashboard_stats(request):
         # Bed occupied
         try:
             occupied_filter = Q(fldencounterval__isnull=False) & ~Q(fldencounterval="")
-            bed_rows = Tbldepartmentbed.objects.filter(
+            bed_rows = Tbldepartmentbed.objects.using(LEGACY_DB).filter(
                 fldstatus="Active"
             ).values(
                 "flddept"

@@ -16,9 +16,7 @@ export default defineConfig({
       },
       "/dashboard": {
         target: "http://127.0.0.1:8000",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/dashboard/, "/dash"),
-      },
+        changeOrigin: true,      },
       "/media": {
         target: "http://127.0.0.1:8000",
         changeOrigin: true,

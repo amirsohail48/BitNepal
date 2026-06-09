@@ -96,8 +96,21 @@ DATABASES = {
         'USER' : os.getenv("DB_USER"),
         'PASSWORD' : os.getenv("DB_PASSWORD"),
         'PORT' : '3306',
+    },
+
+    'common': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME' : os.getenv("DB2_NAME"),
+        'HOST' : os.getenv("DB2_HOST"),
+        'USER' : os.getenv("DB2_USER"),
+        'PASSWORD' : os.getenv("DB2_PASSWORD"),
+        "PORT": os.getenv("DB2_PORT", "3306"),
     }
 }
+
+DATABASE_ROUTERS = [
+    "common.db_routers.LegacyHMISRouter",
+]
 
 
 # Password validation

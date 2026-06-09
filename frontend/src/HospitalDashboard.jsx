@@ -290,7 +290,7 @@ export default function HospitalDashboard() {
                 <header className="bg-white rounded-lg shadow-sm p-4 mb-3 grid grid-cols-1 lg:grid-cols-[1fr_auto_auto] items-center gap-6">
                     <div className="flex items-center gap-4">
                         <img
-                            src={settings?.hospital_logo || hospitalLogo}
+                            src={settings?.hospital_logo || {hospitalLogo}}
                             alt="Hospital Logo"
                             className="w-20 h-16 object-contain border-0 border-blue-900"
                         />
